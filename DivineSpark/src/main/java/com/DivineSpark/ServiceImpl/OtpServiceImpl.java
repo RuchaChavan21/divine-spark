@@ -2,18 +2,23 @@ package com.DivineSpark.ServiceImpl;
 
 import com.DivineSpark.model.OtpToken;
 import com.DivineSpark.repository.OtpTokenRepository;
+import com.DivineSpark.repository.UserRepository;
 import com.DivineSpark.service.OtpService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OtpServiceImpl implements OtpService {
 
     private final OtpTokenRepository otpTokenRepository;
+    private final UserRepository userRepository;
 
 
     //generates OTP
@@ -37,7 +42,8 @@ public class OtpServiceImpl implements OtpService {
     }
 
     //Verify
-    public boolean verifyOtp(String email,String otp){
+    @Transactional
+    public boolean verifyOtp(String email, String otp) {
         return otpTokenRepository.findTopByEmailOrderByCreatedAtDesc(email)
                 .filter(token -> !token.isVerified())
                 .filter(token -> token.getExpiresAt().isAfter(LocalDateTime.now()))
@@ -45,7 +51,18 @@ public class OtpServiceImpl implements OtpService {
                 .map(token -> {
                     token.setVerified(true);
                     otpTokenRepository.save(token);
+                    log.info("OTP verified and saved for email: {}", email);
+
+                    userRepository.findByEmail(email).ifPresent(user -> {
+                        user.setVerified(true);
+                        userRepository.save(user);
+                        log.info("User verified flag updated for email: {}", email);
+                    });
+
                     return true;
-                }).orElse(false);
+                }).orElseGet(() -> {
+                    log.warn("OTP verification failed for email: {}", email);
+                    return false;
+                });
     }
 }
