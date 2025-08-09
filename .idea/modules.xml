@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/DivineSpark.iml" filepath="$PROJECT_DIR$/.idea/DivineSpark.iml" />
+      <module fileurl="file://$PROJECT_DIR$/DivineSpark/DivineSpark.iml" filepath="$PROJECT_DIR$/DivineSpark/DivineSpark.iml" />
     </modules>
   </component>
 </project>
