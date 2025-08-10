@@ -15,6 +15,7 @@ public class RegisterUserDTO {
     private String username;
     private String email;
     private String password;
+    private String phoneNumber;
     private Set<String> roles;
 
 }
