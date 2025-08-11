@@ -31,6 +31,12 @@ public class Session {
     @Column(length = 2000)
     private String description;
 
+    @Column(nullable = false)
+    private String GuideName;
+
+    @Column(nullable = false)
+    private String SessionCategory;
+
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @Column(name = "start_time", nullable = false)
     private LocalDateTime startTime;
@@ -64,4 +70,6 @@ public class Session {
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+
 }

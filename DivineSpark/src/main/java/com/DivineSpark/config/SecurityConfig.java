@@ -3,6 +3,7 @@ package com.DivineSpark.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -20,18 +21,37 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // disable CSRF for APIs
+                .csrf(csrf -> csrf.disable())
                 .cors(cors -> {})
                 .authorizeHttpRequests(auth -> auth
+
+                        // Public authentication APIs
                         .requestMatchers("/api/auth/request-otp",
                                 "/api/auth/verify-otp",
                                 "/api/auth/register",
-                                "/api/auth/login").permitAll() // public APIs
-                        .anyRequest().authenticated() // all other APIs need login
+                                "/api/auth/login").permitAll()
+
+                        // Public GET session endpoints
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/sessions",
+                                "/api/sessions/",
+                                "/api/sessions/{id}",
+                                "/api/sessions/active/**",
+                                "/api/sessions/upcoming",
+                                "/api/sessions/search").permitAll()
+
+                        // Admin-only session management
+                        .requestMatchers("/api/sessions/admin/**").hasRole("ADMIN")
+
+                        // Bookings require login
+                        .requestMatchers("/api/bookings/**").hasAnyRole("USER", "ADMIN")
+
+                        // All other requests need authentication
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .httpBasic(basic -> basic.disable()) // disabling basic auth
-                .formLogin(form -> form.disable()); // disabling form login
+                .httpBasic(basic -> basic.disable())
+                .formLogin(form -> form.disable());
 
         return http.build();
     }
@@ -45,6 +65,4 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
-
-
 }

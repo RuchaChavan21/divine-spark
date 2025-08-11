@@ -18,72 +18,64 @@ public class SessionController {
 
     private final SessionService sessionService;
 
-    // ---------- ADMIN APIs
+    // ---------------- ADMIN APIs (Require ROLE_ADMIN) ---------------- //
 
     @PostMapping("/admin")
     public ResponseEntity<Session> createSession(@RequestBody Session session) {
-        log.info("Received request to create session: {}", session);
-        try {
-            Session created = sessionService.createSession(session);
-            log.info("Session created successfully with ID: {}", created.getId());
-            return ResponseEntity.ok(created);
-        } catch (Exception e) {
-            log.error("Error creating session: {}", e.getMessage(), e);
-            throw e; // rethrow so global handler can manage it
-        }
+        log.info("Admin creating session: {}", session);
+        Session created = sessionService.createSession(session);
+        return ResponseEntity.ok(created);
     }
 
     @PutMapping("/admin/{id}")
     public ResponseEntity<Session> updateSession(@PathVariable Long id, @RequestBody Session session) {
-        log.info("Received request to update session with ID: {}", id);
+        log.info("Admin updating session ID: {}", id);
         Session updated = sessionService.updateSession(id, session);
-        log.info("Session updated successfully: {}", updated);
         return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/admin/{id}")
     public ResponseEntity<Void> deleteSession(@PathVariable Long id) {
-        log.info("Deleting session with ID: {}", id);
+        log.info("Admin deleting session ID: {}", id);
         sessionService.deleteSession(id);
-        log.info("Session deleted successfully");
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/admin")
-    public ResponseEntity<List<Session>> getAllSessions() {
-        log.info("Fetching all sessions");
+    public ResponseEntity<List<Session>> getAllSessionsForAdmin() {
+        log.info("Admin fetching ALL sessions (active/inactive)");
         return ResponseEntity.ok(sessionService.getAllSessions());
     }
 
-    // ---------- USER APIs
+    // ---------------- PUBLIC APIs (No login required) ---------------- //
 
-    @GetMapping("/active")
+    @GetMapping
     public ResponseEntity<List<Session>> getActiveSessions() {
-        log.info("Fetching all active sessions");
+        log.info("Fetching active sessions (public)");
         return ResponseEntity.ok(sessionService.getActiveSessions());
     }
 
-    @GetMapping("/active/type/{type}")
-    public ResponseEntity<List<Session>> getActiveSessionsByType(@PathVariable SessionType type) {
-        log.info("Fetching active sessions by type: {}", type);
-        return ResponseEntity.ok(sessionService.getActiveSessionsByType(type));
+    @GetMapping("/{id}")
+    public ResponseEntity<Session> getSessionById(@PathVariable Long id) {
+        log.info("Fetching session by ID (public): {}", id);
+        return ResponseEntity.ok(sessionService.getSessionById(id));
     }
 
     @GetMapping("/upcoming")
     public ResponseEntity<List<Session>> getUpcomingSessions() {
-        log.info("Fetching upcoming sessions");
+        log.info("Fetching upcoming sessions (public)");
         return ResponseEntity.ok(sessionService.getUpcomingSessions());
     }
 
     @GetMapping("/search")
     public ResponseEntity<List<Session>> searchSessions(@RequestParam String keyword) {
-        log.info("Searching sessions with keyword: {}", keyword);
+        log.info("Public search for sessions with keyword: {}", keyword);
         return ResponseEntity.ok(sessionService.searchSessionsByTitle(keyword));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Session> getSessionById(@PathVariable Long id) {
-        log.info("Fetching session by ID: {}", id);
-        return ResponseEntity.ok(sessionService.getSessionById(id));
+    @GetMapping("/active/type/{type}")
+    public ResponseEntity<List<Session>> getActiveSessionsByType(@PathVariable SessionType type) {
+        log.info("Fetching active sessions by type (public): {}", type);
+        return ResponseEntity.ok(sessionService.getActiveSessionsByType(type));
     }
 }
