@@ -3,14 +3,14 @@ package com.DivineSpark.repository;
 import com.DivineSpark.model.Session;
 import com.DivineSpark.model.SessionType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.time.LocalDateTime;
 
-
 @Repository
-public interface SessionRepository extends JpaRepository<Session, Long> {
+public interface SessionRepository extends JpaRepository<Session, Long>, JpaSpecificationExecutor<Session> {
 
     // Find all active sessions
     List<Session> findByActiveTrue();

@@ -29,7 +29,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/request-otp",
                                 "/api/auth/verify-otp",
                                 "/api/auth/register",
-                                "/api/auth/login").permitAll()
+                                "/api/auth/login",
+                                "/api/password-reset/**").permitAll()
 
                         // Public GET session endpoints
                         .requestMatchers(HttpMethod.GET,
