@@ -2,6 +2,7 @@ package com.DivineSpark.service;
 
 import com.DivineSpark.model.Session;
 import com.DivineSpark.model.SessionType;
+import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -36,4 +37,12 @@ public interface SessionService {
 
 
     Session getSessionById(Long id);
+
+    Page<Session> getSessionWithPaginationAndfiltering(
+            int page,
+            int size,
+            String sortBy,
+            String sortDir,
+            String keyword
+    );
 }

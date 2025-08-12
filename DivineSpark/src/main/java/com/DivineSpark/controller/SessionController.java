@@ -6,6 +6,7 @@ import com.DivineSpark.service.SessionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +21,7 @@ public class SessionController {
 
     // ---------------- ADMIN APIs (Require ROLE_ADMIN) ---------------- //
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/admin")
     public ResponseEntity<Session> createSession(@RequestBody Session session) {
         log.info("Admin creating session: {}", session);
@@ -27,6 +29,7 @@ public class SessionController {
         return ResponseEntity.ok(created);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/admin/{id}")
     public ResponseEntity<Session> updateSession(@PathVariable Long id, @RequestBody Session session) {
         log.info("Admin updating session ID: {}", id);
@@ -34,6 +37,7 @@ public class SessionController {
         return ResponseEntity.ok(updated);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/admin/{id}")
     public ResponseEntity<Void> deleteSession(@PathVariable Long id) {
         log.info("Admin deleting session ID: {}", id);
@@ -41,6 +45,7 @@ public class SessionController {
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/admin")
     public ResponseEntity<List<Session>> getAllSessionsForAdmin() {
         log.info("Admin fetching ALL sessions (active/inactive)");
@@ -78,4 +83,21 @@ public class SessionController {
         log.info("Fetching active sessions by type (public): {}", type);
         return ResponseEntity.ok(sessionService.getActiveSessionsByType(type));
     }
+
+    @GetMapping("/paginated")
+    public ResponseEntity<?> getSessionsWithPaginationAndFiltering(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "startTime") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir,
+            @RequestParam(required = false) String keyword
+    ) {
+        log.info("Fetching paginated sessions: page={}, size={}, sortBy={}, sortDir={}, keyword={}",
+                page, size, sortBy, sortDir, keyword);
+
+        return ResponseEntity.ok(
+                sessionService.getSessionWithPaginationAndfiltering(page, size, sortBy, sortDir, keyword)
+        );
+    }
+
 }

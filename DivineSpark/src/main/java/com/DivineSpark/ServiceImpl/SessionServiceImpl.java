@@ -8,6 +8,11 @@ import jakarta.persistence.EntityNotFoundException;
 
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -82,4 +87,22 @@ public class SessionServiceImpl implements SessionService {
         return sessionRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Session not found with ID: " + id));
     }
+
+    @Override
+    public Page<Session> getSessionWithPaginationAndfiltering(int page, int size, String sortBy, String sortDir, String keyword) {
+        Sort sort = sortDir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Specification<Session> spec = (root, query, cb) -> {
+            if (keyword != null && !keyword.isEmpty()) {
+                String likePattern = "%" + keyword.toLowerCase() + "%";
+                return cb.or(cb.like(cb.lower(root.get("title")), likePattern),
+                        cb.like(cb.lower(root.get("description")), likePattern)
+                );
+            }
+            return cb.conjunction();
+        };
+        return sessionRepository.findAll(spec, pageable);
+    }
+
 }
