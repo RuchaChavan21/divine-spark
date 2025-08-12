@@ -20,4 +20,16 @@ public class EmailServiceImpl implements EmailService {
         message.setText("Your OTP for Divine Spark registration is " + otp + "\nThis OTP will expire in 5 minutes");
         mailSender.send(message);
     }
+
+    @Override
+    public void sendBookingEmail(String to, String subject, String body) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject(subject);
+        message.setText(body);
+
+        mailSender.send(message);
+    }
+
+
 }
