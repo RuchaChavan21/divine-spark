@@ -76,24 +76,36 @@ public class BookingController {
         return ResponseEntity.ok(success ? "Booking successful" : "Booking failed");
     }
 
-    @GetMapping("/join-session/{token}")
-    public ResponseEntity<?> joinSession(@PathVariable String token){
-        log.info("Join link accessed with token: {}", token);
-        Optional<SessionBooking> booking = bookingRepository.findByJoinToken(token);
-        if (booking.isEmpty()) {
-            log.warn("No booking found for token: {}", token);
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid or expired join link");
+    @GetMapping("/join-session")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> joinSession(
+            @RequestParam String token,
+            Authentication authentication) {
+
+        String email = (String) authentication.getPrincipal();
+        Optional<SessionBooking> bookingOpt = bookingRepository.findByJoinToken(token);
+
+        if (bookingOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid or expired link");
         }
-        SessionBooking sessionBooking = booking.get();
-        String zoomLink = sessionBooking.getSession().getZoomLink();
-        log.info("Redirecting to Zoom link: {}", zoomLink);
-        if (zoomLink == null || zoomLink.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Zoom link not available.");
+
+        SessionBooking booking = bookingOpt.get();
+
+        if (!booking.getUser().getEmail().equals(email)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("This link is not for you");
         }
-        HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(URI.create(zoomLink));
-        return new ResponseEntity<>(headers, HttpStatus.FOUND);
+
+        String zoomLink = booking.getSession().getZoomLink();
+//        if (zoomLink == null || zoomLink.isEmpty()) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Zoom link not available.");
+//        }
+//
+//        return ResponseEntity.ok(zoomLink);
+
+        return ResponseEntity.ok("<html><body><script>window.location.href='" + zoomLink + "';</script></body></html>");
+
     }
+
 
 
 }

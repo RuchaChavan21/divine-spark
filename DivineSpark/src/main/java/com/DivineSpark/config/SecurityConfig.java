@@ -45,7 +45,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/sessions/admin/**").hasRole("ADMIN")
 
                         // Bookings require login
-                        .requestMatchers("/api/bookings/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/api/book/**").hasAnyRole("USER", "ADMIN")
 
                         // All other requests need authentication
                         .anyRequest().authenticated()

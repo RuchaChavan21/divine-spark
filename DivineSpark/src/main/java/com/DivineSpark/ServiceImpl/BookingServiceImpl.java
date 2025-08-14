@@ -52,7 +52,16 @@ public class BookingServiceImpl implements BookingService {
         bookingRepository.save(sessionBooking);
 
         //5: Send email
-        String joinLink = "https://yourdomain.com/join-session/" + joinToken;
+        String joinLink = "https://yourdomain.com/api/book/join-session?token=" + joinToken;
+
+        /*
+        TO (future version for your real frontend):
+        String joinLink = "https://www.your-actual-website.com/join?token=" + joinToken;
+
+         Example for a React app running on localhost:3000
+        String joinLink = "http://localhost:3000/join?token=" + joinToken;
+        */
+
         emailService.sendBookingEmail(user.getEmail(),
                 "Your Session Booking Confirmation",
                 "You have booked: "+session.getTitle() +
@@ -100,7 +109,16 @@ public class BookingServiceImpl implements BookingService {
         bookingRepository.save(sessionBooking);
 
         //5: Send email
-        String joinLink = "https://yourdomain.com/join-session/" + joinToken;
+        String joinLink = "https://yourdomain.com/api/book/join-session?token=" + joinToken;
+
+        /*
+        TO (future version for your real frontend):
+        String joinLink = "https://www.your-actual-website.com/join?token=" + joinToken;
+
+         Example for a React app running on localhost:3000
+        String joinLink = "http://localhost:3000/join?token=" + joinToken;
+        */
+
         emailService.sendBookingEmail(user.getEmail(),
                 "Your Session Booking Confirmation",
                 "Payment ID: "+paymentId +
