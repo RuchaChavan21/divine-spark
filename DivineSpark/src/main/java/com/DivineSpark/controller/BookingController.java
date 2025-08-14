@@ -14,7 +14,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import javax.swing.text.html.Option;
 import java.net.URI;
 import java.util.Optional;
 
@@ -36,8 +35,9 @@ public class BookingController {
             Authentication authentication) {
 
         String email = (String) authentication.getPrincipal();
-        Optional<User> user = userRepository.findByEmail(email);
-        long userId = userRepository.findByEmail(email).get().getId();
+        long userId = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"))
+                .getId();
 
         log.info("Free booking request: sessionId={}, userId={}", sessionId, userId);
 
@@ -52,8 +52,10 @@ public class BookingController {
             Authentication authentication) {
 
         String email = (String) authentication.getPrincipal();
-        Optional<User> user = userRepository.findByEmail(email);
-        long userId = userRepository.findByEmail(email).get().getId();
+        long userId = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"))
+                .getId();
+
         log.info("Paid booking initiation: sessionId={}, userId={}", sessionId, userId);
 
         return ResponseEntity.ok(bookingService.initiatePaidSessionBooking(sessionId, userId));
@@ -68,14 +70,17 @@ public class BookingController {
             Authentication authentication) {
 
         String email = (String) authentication.getPrincipal();
-        Optional<User> user = userRepository.findByEmail(email);
-        long userId = userRepository.findByEmail(email).get().getId();
+        long userId = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"))
+                .getId();
+
         log.info("Payment confirmation: paymentId={}, sessionId={}, userId={}", paymentId, sessionId, userId);
 
         boolean success = bookingService.confirmPaidSessionBooking(paymentId, sessionId, userId);
         return ResponseEntity.ok(success ? "Booking successful" : "Booking failed");
     }
 
+    // Join session using token
     @GetMapping("/join-session")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> joinSession(
@@ -83,29 +88,27 @@ public class BookingController {
             Authentication authentication) {
 
         String email = (String) authentication.getPrincipal();
-        Optional<SessionBooking> bookingOpt = bookingRepository.findByJoinToken(token);
+        log.info("Join link accessed with token: {}", token);
 
+        Optional<SessionBooking> bookingOpt = bookingRepository.findByJoinToken(token);
         if (bookingOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid or expired link");
+            log.warn("No booking found for token: {}", token);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid or expired join link");
         }
 
         SessionBooking booking = bookingOpt.get();
-
         if (!booking.getUser().getEmail().equals(email)) {
+            log.warn("User email mismatch for join link: {}", email);
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("This link is not for you");
         }
 
         String zoomLink = booking.getSession().getZoomLink();
-//        if (zoomLink == null || zoomLink.isEmpty()) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Zoom link not available.");
-//        }
-//
-//        return ResponseEntity.ok(zoomLink);
+        if (zoomLink == null || zoomLink.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Zoom link not available.");
+        }
 
-        return ResponseEntity.ok("<html><body><script>window.location.href='" + zoomLink + "';</script></body></html>");
-
+        HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(URI.create(zoomLink));
+        return new ResponseEntity<>(headers, HttpStatus.FOUND);
     }
-
-
-
 }
