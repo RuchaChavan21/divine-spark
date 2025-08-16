@@ -27,51 +27,47 @@ public class BookingServiceImpl implements BookingService {
     private final EmailService emailService;
 
     @Override
-
     public SessionBooking bookFreeSession(Long sessionId, Long userId) {
-        // 1: Fetch Session and user
         Session session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Session not found"));
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        // 2: Check if already booked
+        // 1: Check if already booked
         if (bookingRepository.existsBySessionAndUserId(session, user.getId())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You have already booked this session!");
         }
 
-        // 3: Check seat availability
+        // 2: Check seat availability
         long bookedCount = bookingRepository.countBySession(session);
         if (bookedCount >= session.getCapacity()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Session is fully booked");
         }
 
-        // 4: Create unique join Token
+        // 3: Create unique join token
         String joinToken = UUID.randomUUID().toString();
 
-        // 5: Save Booking
-        SessionBooking sessionBooking = new SessionBooking();
-        sessionBooking.setSession(session);
-        sessionBooking.setUser(user);
-        sessionBooking.setPaymentStatus("Free");
-        sessionBooking.setJoinToken(joinToken);
-        sessionBooking.setBookingDate(LocalDateTime.now());
-        bookingRepository.save(sessionBooking);
+        // 4: Save Booking
+        SessionBooking booking = new SessionBooking();
+        booking.setSession(session);
+        booking.setUser(user);
+        booking.setPaymentStatus("FREE");
+        booking.setJoinToken(joinToken);
+        booking.setBookingDate(LocalDateTime.now());
+        bookingRepository.save(booking);
 
-        // 6: Send email
+        // 5: Send confirmation email
         String joinLink = "https://yourdomain.com/api/book/join-session?token=" + joinToken;
-
         emailService.sendBookingEmail(
                 user.getEmail(),
-                "Your Session Booking Confirmation",
+                "Session Booking Confirmation",
                 "You have booked: " + session.getTitle() +
                         "\nJoin link: " + joinLink
         );
 
-        return sessionBooking;
+        return booking;
     }
-
 
     @Override
     public String initiatePaidSessionBooking(Long sessionId, Long userId) {
@@ -87,32 +83,35 @@ public class BookingServiceImpl implements BookingService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        // Check if already booked
+        // 1: Check if already booked
         if (bookingRepository.existsBySessionAndUserId(session, user.getId())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You have already booked this session!");
         }
 
-        // Check seat availability
+        // 2: Check seat availability
         long bookedCount = bookingRepository.countBySession(session);
         if (bookedCount >= session.getCapacity()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Session is fully booked");
         }
 
+        // 3: Create unique join token
         String joinToken = UUID.randomUUID().toString();
 
-        SessionBooking sessionBooking = new SessionBooking();
-        sessionBooking.setSession(session);
-        sessionBooking.setUser(user);
-        sessionBooking.setPaymentStatus("PAID");
-        sessionBooking.setJoinToken(joinToken);
-        sessionBooking.setEmailSentStatus("Sent");
-        sessionBooking.setBookingDate(LocalDateTime.now());
-        bookingRepository.save(sessionBooking);
+        // 4: Save Booking
+        SessionBooking booking = new SessionBooking();
+        booking.setSession(session);
+        booking.setUser(user);
+        booking.setPaymentStatus("PAID");
+        booking.setJoinToken(joinToken);
+        booking.setEmailSentStatus("Sent");
+        booking.setBookingDate(LocalDateTime.now());
+        bookingRepository.save(booking);
 
+        // 5: Send confirmation email
         String joinLink = "https://yourdomain.com/api/book/join-session?token=" + joinToken;
         emailService.sendBookingEmail(
                 user.getEmail(),
-                "Your Session Booking Confirmation",
+                "Session Booking Confirmation",
                 "Payment ID: " + paymentId +
                         "\nYou have booked: " + session.getTitle() +
                         "\nJoin link: " + joinLink
