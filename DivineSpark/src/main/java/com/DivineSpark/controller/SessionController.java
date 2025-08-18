@@ -52,6 +52,15 @@ public class SessionController {
         return ResponseEntity.ok(sessionService.getAllSessions());
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/admin/{id}/cancel")
+    public ResponseEntity<String> cancelSession(@PathVariable Long id) {
+        log.info("Admin cancelling session ID: {}", id);
+        sessionService.cancelSession(id);
+        return ResponseEntity.ok("Session has been cancelled and users notified.");
+    }
+
+
     // ---------------- PUBLIC APIs (No login required) ---------------- //
 
     @GetMapping
@@ -83,6 +92,11 @@ public class SessionController {
         log.info("Fetching active sessions by type (public): {}", type);
         return ResponseEntity.ok(sessionService.getActiveSessionsByType(type));
     }
+
+
+
+
+
 
     @GetMapping("/paginated")
     public ResponseEntity<?> getSessionsWithPaginationAndFiltering(

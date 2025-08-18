@@ -41,7 +41,7 @@ public class SecurityConfig {
                                 "/api/sessions/upcoming",
                                 "/api/sessions/search").permitAll()
 
-                        // Admin-only session management
+                        // Admin-only session management (all methods: GET, POST, PUT, DELETE)
                         .requestMatchers("/api/sessions/admin/**").hasRole("ADMIN")
 
                         // Bookings require login

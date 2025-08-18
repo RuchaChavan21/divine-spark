@@ -38,6 +38,8 @@ public interface SessionService {
 
     Session getSessionById(Long id);
 
+    void cancelSession(Long sessionId);
+
     Page<Session> getSessionWithPaginationAndfiltering(
             int page,
             int size,
