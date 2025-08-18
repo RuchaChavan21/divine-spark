@@ -5,9 +5,10 @@ import com.DivineSpark.model.SessionBooking;
 import com.DivineSpark.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
-public interface BookingRepository extends JpaRepository<SessionBooking,Long> {
+public interface BookingRepository extends JpaRepository<SessionBooking, Long> {
 
     long countBySession(Session session);
 
@@ -16,5 +17,8 @@ public interface BookingRepository extends JpaRepository<SessionBooking,Long> {
     Optional<SessionBooking> findByJoinToken(String joinToken);
 
     Optional<SessionBooking> findByUserAndSession(User user, Session session);
+
+    // Required for cancel session functionality
+    List<SessionBooking> findBySession(Session session);
 
 }

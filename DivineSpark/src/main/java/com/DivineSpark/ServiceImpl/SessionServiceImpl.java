@@ -1,12 +1,13 @@
 package com.DivineSpark.ServiceImpl;
 
 import com.DivineSpark.model.Session;
+import com.DivineSpark.model.SessionBooking;
 import com.DivineSpark.model.SessionType;
+import com.DivineSpark.repository.BookingRepository;
 import com.DivineSpark.repository.SessionRepository;
+import com.DivineSpark.service.EmailService;
 import com.DivineSpark.service.SessionService;
 import jakarta.persistence.EntityNotFoundException;
-
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,17 +15,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
 public class SessionServiceImpl implements SessionService {
 
     private final SessionRepository sessionRepository;
-
+    private final BookingRepository bookingRepository;
+    private final EmailService emailService;
 
     @Override
     public Session createSession(Session session) {
@@ -89,6 +91,42 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
+    @Transactional
+    public void cancelSession(Long sessionId) {
+        Session session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new EntityNotFoundException("Session not found with ID: " + sessionId));
+
+        // 1️⃣ Deactivate the session
+        session.setActive(false);
+        sessionRepository.save(session);
+
+        // 2️⃣ Fetch all bookings for this session
+        List<SessionBooking> bookings = bookingRepository.findBySession(session);
+
+        // 3️⃣ Send cancellation emails to all booked users
+        for (SessionBooking booking : bookings) {
+            String username = booking.getUser().getUsername();
+            String email = booking.getUser().getEmail();
+            emailService.sendBookingEmail(
+                    email,
+                    "Session Cancelled: " + session.getTitle(),
+                    "Hello " + username + ",\n\n" +
+                            "We regret to inform you that the session '" + session.getTitle() +
+                            "' scheduled on " + session.getStartTime() +
+                            " has been cancelled.\n\n" +
+                            "If you have paid for this session, your refund will be processed within 7 days.\n\n" +
+                            "Regards,\nDivine Spark Team"
+            );
+        }
+
+        // 4️⃣ Mark all bookings as CANCELLED
+        for (SessionBooking booking : bookings) {
+            booking.setPaymentStatus("CANCELLED");
+        }
+        bookingRepository.saveAll(bookings);
+    }
+
+    @Override
     public Page<Session> getSessionWithPaginationAndfiltering(int page, int size, String sortBy, String sortDir, String keyword) {
         Sort sort = sortDir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
         Pageable pageable = PageRequest.of(page, size, sort);
@@ -104,5 +142,4 @@ public class SessionServiceImpl implements SessionService {
         };
         return sessionRepository.findAll(spec, pageable);
     }
-
 }

@@ -55,7 +55,9 @@ public class BookingServiceImpl implements BookingService {
         booking.setPaymentStatus("FREE");
         booking.setJoinToken(joinToken);
         booking.setBookingDate(LocalDateTime.now());
+        booking.setEmailSentStatus("Sent");
         bookingRepository.save(booking);
+
 
         // 5: Send confirmation email
         String joinLink = "https://yourdomain.com/api/book/join-session?token=" + joinToken;
