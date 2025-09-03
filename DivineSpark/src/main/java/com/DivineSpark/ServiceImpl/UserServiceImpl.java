@@ -24,38 +24,37 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
 
 
+
     @Override
     public User registerUser(RegisterUserDTO dto) {
-        //Check Otp verification
+        // 1. Check OTP verification (remains the same)
         boolean isVerified = otpTokenRepository.findTopByEmailOrderByCreatedAtDesc(dto.getEmail())
                 .map(token -> token.isVerified())
                 .orElse(false);
 
-        if(!isVerified) {
+        if (!isVerified) {
             throw new RuntimeException("Email not verified. Please verify first");
         }
 
-        //Create Role
+        // 2. Assign the default 'USER' role directly
         Set<Role> userRoles = new HashSet<>();
-        for(String roleName : dto.getRoles()) {
-            Role role = roleRepository.findByName(roleName)
-                    .orElseThrow(()-> new RuntimeException("Role not found: "+ roleName));
-            userRoles.add(role);
-        }
+        Role defaultRole = roleRepository.findByName("ROLE_USER") // Ensure "ROLE_USER" exists in your DB
+                .orElseThrow(() -> new RuntimeException("Default role 'ROLE_USER' not found in DB"));
+        userRoles.add(defaultRole);
 
-        //Save user
+
+        // 3. Save user (remains the same)
         User user = new User();
         user.setUsername(dto.getUsername());
         user.setEmail(dto.getEmail());
         user.setPhoneNumber(dto.getPhoneNumber());
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
-        user.setRoles(userRoles);
+        user.setRoles(userRoles); // Assigns the default role set
         user.setVerified(true);
 
         return userRepository.save(user);
-
-
     }
+
 
     public User findByEmail(String email) {
         return userRepository.findByEmail(email)
