@@ -38,7 +38,7 @@ public class UserServiceImpl implements UserService {
 
         // 2. Assign the default 'USER' role directly
         Set<Role> userRoles = new HashSet<>();
-        Role defaultRole = roleRepository.findByName("ROLE_USER") // Ensure "ROLE_USER" exists in your DB
+        Role defaultRole = roleRepository.findByName("ROLE_USER") 
                 .orElseThrow(() -> new RuntimeException("Default role 'ROLE_USER' not found in DB"));
         userRoles.add(defaultRole);
 
