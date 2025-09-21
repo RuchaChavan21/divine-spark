@@ -52,6 +52,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 Set<String> roles = jwtUtil.extractRoles(token);
 
                 // 4. Convert roles to Spring GrantedAuthorities
+                // This is the corrected line
                 var authorities = roles.stream()
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
@@ -77,6 +78,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
         // Skip JWT filter for auth-related endpoints and preflight
-        return path.startsWith("/api/auth/register") || "OPTIONS".equalsIgnoreCase(request.getMethod());
+        return path.startsWith("/api/auth/") || "OPTIONS".equalsIgnoreCase(request.getMethod());
     }
 }
