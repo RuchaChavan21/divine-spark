@@ -37,11 +37,11 @@ public class Session {
     @Column(nullable = false)
     private String SessionCategory;
 
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     @Column(name = "start_time", nullable = false)
     private LocalDateTime startTime;
 
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     @Column(name = "end_time")
     private LocalDateTime endTime;
 
@@ -62,12 +62,12 @@ public class Session {
     private boolean active = true;
 
     @CreationTimestamp
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 

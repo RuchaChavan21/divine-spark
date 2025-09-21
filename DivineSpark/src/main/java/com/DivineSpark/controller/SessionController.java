@@ -22,7 +22,7 @@ public class SessionController {
     // ---------------- ADMIN APIs (Require ROLE_ADMIN) ---------------- //
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/admin")
+    @PostMapping("/admin/create")
     public ResponseEntity<Session> createSession(@RequestBody Session session) {
         log.info("Admin creating session: {}", session);
         Session created = sessionService.createSession(session);
@@ -92,9 +92,6 @@ public class SessionController {
         log.info("Fetching active sessions by type (public): {}", type);
         return ResponseEntity.ok(sessionService.getActiveSessionsByType(type));
     }
-
-
-
 
 
 
