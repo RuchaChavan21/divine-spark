@@ -15,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -26,6 +27,7 @@ public class BookingController {
     private final BookingService bookingService;
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
+
 
     // Free booking
     @PostMapping("/free/{sessionId}")
@@ -44,10 +46,9 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.bookFreeSession(sessionId, userId));
     }
 
-    // Paid booking - Step 1 (initiate payment)
     @PostMapping("/paid/{sessionId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<String> initiatePaidSessionBooking(
+    public ResponseEntity<Map<String, Object>> initiatePaidSessionBooking(
             @PathVariable Long sessionId,
             Authentication authentication) {
 
@@ -58,7 +59,8 @@ public class BookingController {
 
         log.info("Paid booking initiation: sessionId={}, userId={}", sessionId, userId);
 
-        return ResponseEntity.ok(bookingService.initiatePaidSessionBooking(sessionId, userId));
+        Map<String, Object> paymentData = bookingService.initiatePaidSessionBooking(sessionId, userId);
+        return ResponseEntity.ok(paymentData);
     }
 
     // Paid booking - Step 2 (confirm after payment success)
