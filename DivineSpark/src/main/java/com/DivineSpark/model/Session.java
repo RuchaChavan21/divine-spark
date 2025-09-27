@@ -50,7 +50,7 @@ public class Session {
     private SessionType type;
 
     @Column(precision = 10, scale = 2)
-    private BigDecimal price;
+    private int price;
 
     @Column
     private Integer capacity;
