@@ -3,6 +3,7 @@ package com.DivineSpark.service;
 import com.DivineSpark.model.Session;
 import com.DivineSpark.model.SessionType;
 import org.springframework.data.domain.Page;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.Optional;
 public interface SessionService {
 
 
-    Session createSession(Session session);
+    Session createSession(Session session, MultipartFile imageFile);
 
 
     Session updateSession(Long sessionId, Session session);

@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -23,9 +24,13 @@ public class SessionController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/admin/create")
-    public ResponseEntity<Session> createSession(@RequestBody Session session) {
-        log.info("Admin creating session: {}", session);
-        Session created = sessionService.createSession(session);
+    public ResponseEntity<Session> createSession(
+            @RequestPart("session") Session session,
+            @RequestPart("image") MultipartFile imageFile) {
+
+        // CORRECT: Passing the whole MultipartFile object
+        Session created = sessionService.createSession(session, imageFile);
+
         return ResponseEntity.ok(created);
     }
 

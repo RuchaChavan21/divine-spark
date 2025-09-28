@@ -1,14 +1,11 @@
 package com.DivineSpark.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -30,6 +27,9 @@ public class Session {
 
     @Column(length = 2000)
     private String description;
+
+    @Column(name = "image_url")
+    private String imageUrl; // <-- This will store the URL from AWS S3
 
     @Column(nullable = false)
     private String GuideName;
@@ -70,6 +70,4 @@ public class Session {
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-
 }
