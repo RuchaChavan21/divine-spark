@@ -37,6 +37,9 @@ public class SecurityConfig {
                         // Public authentication APIs
                         .requestMatchers("/api/auth/**", "/api/password-reset/**").permitAll()
 
+                        // --- NEW --- Make all donation endpoints public for anonymous users
+                        .requestMatchers("/api/donations/**").permitAll()
+
                         // Public GET session endpoints
                         .requestMatchers(HttpMethod.GET,
                                 "/api/sessions/",
@@ -75,7 +78,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173")); // React frontend
+        configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:3000")); // Add your frontend URL
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
